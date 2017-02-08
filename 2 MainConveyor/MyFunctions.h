@@ -15,16 +15,16 @@ const int function_flag=4;
 
 const string delim="\\";
 const string inp_fin="final_data";
-const string inp_matr="matrixes"+delim+"b2_";
+const string inp_matr="matrixes"+delim+"b3_";
 const string inp_route="input_routes"+delim;
 const string out_res="results_";
 
-const string type1="l";
-const string type2="nl";
-const string type3="ns";
+const string type1="0";
+const string type2="1";
+const string type3="2";
 
 const int maxIntElem=4; //
-const int Namount=256;   //количество различных ground-состояний 8
+const int Namount=576;   //количество различных ground-состояний 6
 const int resAmount=45; //кол-во различных J факторов в 8 порядке
 const int matrixResAmount=429; //кол-во различных слагаемых в ряду теории возмущений в 8 порядке
 
@@ -97,16 +97,16 @@ struct state
 				Res=false;
 				break;
 			}
-			if(Res)
-			{
-				for(int i=0;i<3;i++)
-					if(s.coeff[i]!=coeff[i])
-					{
-						Res=false;
-						break;
-					}
-			}
-			return Res;
+		if(Res)
+		{
+			for(int i=0;i<3;i++)
+				if(s.coeff[i]!=coeff[i])
+				{
+					Res=false;
+					break;
+				}
+		}
+		return Res;
 	}
 };
 
@@ -177,6 +177,8 @@ extern vector<state> temp,temp2,tempvec,tempvec2;
 extern state init;
 //////////////////////////////////////////////////////////////////////////
 
+double getE0(int node_num);//определяет энергию уровня, к которму определяются поправки
+
 
 void returnV(inter curInter[][maxIntElem],int interAmount[],int interN,int n1,int n2,int dx,int dy);//устанавливает оператор взаимодействия вдоль ребра
 
@@ -188,18 +190,18 @@ void generate_all_Jstrings(int n,int **Jfactors,string *strarr);
 
 void collect(vector<state> &outvec,vector<state> &invec);
 
-void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber);
+void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber, int node_num);
 
-void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber);
+void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber, int node_num);
 
-void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber);
+void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber, int node_num);
 
-void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][16][16],int interNumber);
+void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][16][16],int interNumber, int node_num);
 
-void act_inside(vector<state> &inv,vector<state> &outv,int plaquetNumber );
+void act_inside(vector<state> &inv,vector<state> &outv,int plaquetNumber, int node_num);
 
-void act_inside_ground(vector<state> &inv,vector<state> &outv,int plaquetNumber);
+void act_inside_ground(vector<state> &inv,vector<state> &outv,int plaquetNumber, int node_num);
 
-void act_inside_enrgy_power(vector<state> &inv,vector<state> &outv,int power,int plaquetNumber );
+void act_inside_enrgy_power(vector<state> &inv,vector<state> &outv,int power,int plaquetNumber, int node_num);
 
 void generate_procedure_order(int *termorder,int* operatororder,int edge_amount,int num,int *Res,int *power);

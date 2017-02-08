@@ -1,5 +1,12 @@
-//Last edit 05.02.2017 first changes from singlet version
+//Edit 05.02.2017 First changes from singlet version
+//                Change order of basis order
+//				  getE0()added
+//				  output files names are changed
 
+
+//edit 08.02.2017 change N->node_num in all "act_*" functions
+
+//edit 08.02.2017  change vIn: read proper file for each route
 
 // MainConveyor.cpp : Defines the entry point for the console application.
 //
@@ -24,7 +31,8 @@ vector<step> nodes;//вершины текущего маршрута
 
 vector<state> *ref1,*ref2;
 int node_nums_of_edges[N][2];
-int minus1(int *nodeSet,int n)
+
+int minus1(int *nodeSet,int n) //вычисляем знак для текущего слагаемого в рду теории возмущения
 {
 	int res=1;
 	for(int i=0;i<n-1;i++)
@@ -363,13 +371,13 @@ void add_res_Matrix(res **ans,res **cur,int size)
 				ans[i][j].factors[k]+=cur[i][j].factors[k];
 }
 
-void res_Extend(res **ans,int size) //дозаполняем матрицу до симметричной
-{
-	for(int i=0;i<size;i++)
-		for(int j=i+1;j<size;j++)
-			for(int k=0;k<resAmount;k++)
-				ans[j][i].factors[k]=ans[i][j].factors[k];
-}
+//void res_Extend(res **ans,int size) //дозаполняем матрицу до симметричной
+//{
+//	for(int i=0;i<size;i++)
+//		for(int j=i+1;j<size;j++)
+//			for(int k=0;k<resAmount;k++)
+//				ans[j][i].factors[k]=ans[i][j].factors[k];
+//}
 
 
 //int _tmain(int argc, _TCHAR* argv[])
@@ -431,16 +439,16 @@ int main(int argc, char* argv[])
 	config>>type>>Order>>subOrder;
 	switch(type)
 	{
-        case 1: str_type=type1; break;
-        case 2: str_type=type2; break;
-        case 3: str_type=type3; break;
+        case 0: str_type=type1; break;
+        case 1: str_type=type2; break;
+        case 2: str_type=type3; break;
         default: logfile<<"Type error!!"; logfile.close(); return 2;
 
 	}
 	//Если NotLoops и subOrder==Order считываем good file
 	bool goodNotLoopCase=false;
 	vector<int> goodNotLoopNums;
-	if((type==2)&&(subOrder==Order))
+	/*if((type==2)&&(subOrder==Order))
 	{
 		goodNotLoopCase=true;
 		sscanner<<inp_route<<delim<<Order<<"_good_nl.txt";
@@ -452,7 +460,7 @@ int main(int argc, char* argv[])
 			in>>cur;
 			goodNotLoopNums.push_back(cur);
 		}
-	}
+	}*/
 	getline(config,out_string);//Считываем заголовок - он не важен
 	getline(config,out_string);//Считываем заголовок - он не важен
 
@@ -572,7 +580,7 @@ int main(int argc, char* argv[])
 		}
 	in.close();
 
-	in.open((inp_matr+"energie.txt").c_str(),ios::in);
+	in.open((inp_matr+"energy.txt").c_str(),ios::in);
 	for(int i=0;i<16;i++)
 	{
 		in>>Energie[i];
@@ -582,22 +590,20 @@ int main(int argc, char* argv[])
 	//Задаем порядок спинов
 	state init;
 	vector<state> *vIn;
+	int vec_amount = 3 * (Order + 1)*(int)pow((double)2, Order);
+	vIn = new vector<state>[vec_amount];
+
 	sscanner.str("");
 	sscanner<<"spins"<<delim<<Order<<"spins_order.txt";
-
 	ifstream inStates((sscanner.str()).c_str(),ios::in);
-	int temp;
-	int vec_amount=(int)pow((double)2,Order);
-
-	vIn=new vector<state>[vec_amount];
+	
 	init.coeff[0]=init.coeff[1]=init.coeff[2]=0;
 	init.factor=1;
 	for(int i=0;i<vec_amount;i++)
 	{
 		for(int j=0;j<Order;j++) ///TODO N->n
 		{
-			inStates>>temp;
-			init.states[j]=temp;
+			inStates >> init.states[j];
 		}
 		vIn[i].push_back(init);
 	}
@@ -625,7 +631,7 @@ int main(int argc, char* argv[])
 	for(int i=subOrder;i<=subOrder;i++)//Перебираем все возможные длины маршрутов
 	{
 
-		for(int j=1;j<=routesAmount[type-1][subOrder];j++)//перебираем все доступные маршруты при данной длине
+		for(int j=1;j<=routesAmount[type][subOrder];j++)//перебираем все доступные маршруты при данной длине
 		{
 
 			//Блок управления различными копиями, позволяет запускать только часть маршрутов
@@ -638,7 +644,7 @@ int main(int argc, char* argv[])
 			//Блок управления для случая NotLoop subOrder==Order
 			if((goodNotLoopCase)&&(find(goodNotLoopNums.begin(),goodNotLoopNums.end(),j)==goodNotLoopNums.end()))
 			{
-				continue;
+				//continue;
 			}
 
 			clear_res_Matrix(MatrixFull,vec_amount);//Очищаем матрицы результатов для нового маршрута
@@ -661,6 +667,26 @@ int main(int argc, char* argv[])
 			}
 			operatorsset>>edge_num>>node_num;
 
+			//заполняем спины каждый раз
+			sscanner.str("");
+			sscanner << "spins" << delim << node_num << "spins_order.txt";
+			ifstream inStates((sscanner.str()).c_str(), ios::in);
+
+			init.coeff[0] = init.coeff[1] = init.coeff[2] = 0;
+			init.factor = 1;
+			for (int i = 0; i<vec_amount; i++)
+			{
+				vIn[i].clear();
+				for (int j = 0; j<node_num; j++) ///TODO N->n
+				{
+					inStates >> init.states[j];
+				}
+				vIn[i].push_back(init);
+			}
+			//конец заполнения спинов
+
+
+
 			//Проверка на ошибку ребер
 			if(edges.size()!=edge_num)
 			{
@@ -673,7 +699,7 @@ int main(int argc, char* argv[])
 
 
 			getline(operatorsset,s);
-			real_size=(int)pow((double)2,node_num);
+			real_size=3*node_num*(int)pow((double)2,node_num-1);
 			int zz=0;
 			while(!operatorsset.eof())
 			{
@@ -699,9 +725,9 @@ int main(int argc, char* argv[])
 
 					for(unsigned int k=0;k<nodeSets.size();k++)
 					{
-
-						check_cur_operator_set(result,Order,edge_num,nodeSets[k],cur_operator_set,edges);
-						if(result)//вычисляем кофигурацию
+						//Пока вычисляем все конфинурации, нужно будет написать новый чек если будут вычисления в старших порядках
+						//check_cur_operator_set(result,Order,edge_num,nodeSets[k],cur_operator_set,edges);
+						//if(result)//вычисляем кофигурацию
 						{
 							/*if(k==nodeSets.size()-1)
 								t1=clock();*/
@@ -724,19 +750,19 @@ int main(int argc, char* argv[])
 									switch(procedure_order[mm])//выбираем процедуру
 									{
 										case 2:
-											act_ground(*ref1,*ref2,Vmatrix,cur_operator_set[mm]);
+											act_ground(*ref1,*ref2,Vmatrix,cur_operator_set[mm],node_num);
 											break;
 										case 3:
-											act_energy(*ref1,*ref2,Vmatrix,cur_operator_set[mm]);
+											act_energy(*ref1,*ref2,Vmatrix,cur_operator_set[mm], node_num);
 											break;
 										case 4:
-											act_energy_power(*ref1,*ref2,power_order[mm],Vmatrix,cur_operator_set[mm]);
+											act_energy_power(*ref1,*ref2,power_order[mm],Vmatrix,cur_operator_set[mm], node_num);
 											break;
 										case 6:
-											act_inside_enrgy_power(*ref1,*ref2,power_order[mm],cur_operator_set[mm]-edge_num);
+											act_inside_enrgy_power(*ref1,*ref2,power_order[mm],cur_operator_set[mm]-edge_num, node_num);
 											break;
 										case 7:
-											act_inside_ground(*ref1,*ref2,cur_operator_set[mm]-edge_num);
+											act_inside_ground(*ref1,*ref2,cur_operator_set[mm]-edge_num, node_num);
 											break;
 									}
 
@@ -771,25 +797,25 @@ int main(int argc, char* argv[])
 									switch(procedure_order[mm])//выбираем процедуру
 									{
 									case 1:
-										act(*ref1,*ref2,Vmatrix,cur_operator_set[mm]);
+										act(*ref1,*ref2,Vmatrix,cur_operator_set[mm], node_num);
 										break;
 									case 2:
-										act_ground(*ref1,*ref2,Vmatrix,cur_operator_set[mm]);
+										act_ground(*ref1,*ref2,Vmatrix,cur_operator_set[mm], node_num);
 										break;
 									case 3:
-										act_energy(*ref1,*ref2,Vmatrix,cur_operator_set[mm]);
+										act_energy(*ref1,*ref2,Vmatrix,cur_operator_set[mm], node_num);
 										break;
 									case 4:
-										act_energy_power(*ref1,*ref2,power_order[mm],Vmatrix,cur_operator_set[mm]);
+										act_energy_power(*ref1,*ref2,power_order[mm],Vmatrix,cur_operator_set[mm], node_num);
 										break;
 									case 5:
-										act_inside(*ref1,*ref2,cur_operator_set[mm]-edge_num);
+										act_inside(*ref1,*ref2,cur_operator_set[mm]-edge_num, node_num);
 										break;
 									case 6:
-										act_inside_enrgy_power(*ref1,*ref2,power_order[mm],cur_operator_set[mm]-edge_num);
+										act_inside_enrgy_power(*ref1,*ref2,power_order[mm],cur_operator_set[mm]-edge_num, node_num);
 										break;
 									case 7:
-										act_inside_ground(*ref1,*ref2,cur_operator_set[mm]-edge_num);
+										act_inside_ground(*ref1,*ref2,cur_operator_set[mm]-edge_num, node_num);
 										break;
 									}
 

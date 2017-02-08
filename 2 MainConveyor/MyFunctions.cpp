@@ -25,6 +25,9 @@ vector<state> temp,temp2,tempvec,tempvec2;
 state init;
 //////////////////////////////////////////////////////////////////////////
 
+double getE0(int node_num){
+	return Energie[0] * (node_num -1)+Energie[2];//
+}
 
 //направлени€ 0- (0,0); далее против часовой стрелки
 void returnV(inter curInter[][maxIntElem],int interAmount[],int interN,int n1,int n2,int dx,int dy) //n1,n2 - пор€дковые номера соответствующих функций, dir -направление от первого плакета ко второму
@@ -250,14 +253,14 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 
 
-/* #1 */void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16], int interNumber)
+/* #1 */void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16], int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
 	//bool flag;
 	temp2.clear();
 	double curE,E0;
-	E0=Energie[0]*N;
+	E0=getE0(node_num);
 
 	for(unsigned int inSt=0;inSt<inv.size();inSt++)
 	{
@@ -279,7 +282,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 						else
 							tempst.factor=inv[inSt].factor*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
 						// опируем старые состо€ни€, так как не знаем какое будет мен€тьс€
-						for(int oldst=0;oldst<N;oldst++)
+						for(int oldst=0;oldst<node_num;oldst++)
 							tempst.states[oldst]=inv[inSt].states[oldst];
 
 						//ћен€ем состо€ние
@@ -306,12 +309,12 @@ void collect(vector<state> &outvec,vector<state> &invec)
 					{
 						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
 						{
-							for(int oldst=0;oldst<N;oldst++)
+							for(int oldst=0;oldst<node_num;oldst++)
 								tempst.states[oldst]=temp[k].states[oldst];
 							tempst.states[curInter[interNumber][i].n2]=j;
 
 							curE=0;
-							for(int eInd=0;eInd<N;eInd++)
+							for(int eInd=0;eInd<node_num;eInd++)
 								curE+=Energie[tempst.states[eInd]];
 
 							if(curE!=E0)
@@ -337,14 +340,14 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #2 */void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16], int interNumber)
+/* #2 */void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16], int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
 	//bool flag;
 	temp2.clear();
 	double curE,E0;
-	E0=Energie[0]*N;
+	E0= getE0(node_num);
 
 	//test
 	/*static int sti=0;
@@ -373,7 +376,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 						else
 							tempst.factor=inv[inSt].factor*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
 						// опируем старые состо€ни€, так как не знаем какое будет мен€тьс€
-						for(int oldst=0;oldst<N;oldst++)
+						for(int oldst=0;oldst<node_num;oldst++)
 							tempst.states[oldst]=inv[inSt].states[oldst];
 
 						//ћен€ем состо€ние
@@ -401,12 +404,12 @@ void collect(vector<state> &outvec,vector<state> &invec)
 					{
 						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
 						{
-							for(int oldst=0;oldst<N;oldst++)
+							for(int oldst=0;oldst<node_num;oldst++)
 								tempst.states[oldst]=temp[k].states[oldst];
 							tempst.states[curInter[interNumber][i].n2]=j;
 
 							curE=0;
-							for(int eInd=0;eInd<N;eInd++)
+							for(int eInd=0;eInd<node_num;eInd++)
 								curE+=Energie[tempst.states[eInd]];
 
 							if(curE==E0)
@@ -434,7 +437,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #3 */void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber)
+/* #3 */void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
@@ -444,7 +447,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 	if(inv.size()>50)
 		temp2.reserve(30000);
 	outv.clear();
-	E0=N*Energie[0];
+	E0= getE0(node_num);
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
 
@@ -467,7 +470,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 						else
 							tempst.factor=inv[inSt].factor*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
 						// опируем старые состо€ни€, так как не знаем какое будет мен€тьс€
-						for(int oldst=0;oldst<N;oldst++)
+						for(int oldst=0;oldst<node_num;oldst++)
 							tempst.states[oldst]=inv[inSt].states[oldst];
 
 						//ћен€ем состо€ние
@@ -494,12 +497,12 @@ void collect(vector<state> &outvec,vector<state> &invec)
 					{
 						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
 						{
-							for(int oldst=0;oldst<N;oldst++)
+							for(int oldst=0;oldst<node_num;oldst++)
 								tempst.states[oldst]=temp[k].states[oldst];
 							tempst.states[curInter[interNumber][i].n2]=j;
 
 							curE=0;
-							for(int eInd=0;eInd<N;eInd++)
+							for(int eInd=0;eInd<node_num;eInd++)
 								curE+=Energie[tempst.states[eInd]];
 
 
@@ -530,7 +533,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #4 */void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][16][16],int interNumber)
+/* #4 */void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][16][16],int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
@@ -541,7 +544,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 	if(inv.size()>50)
 		temp2.reserve(30000);
 	outv.clear();
-	E0=N*Energie[0];
+	E0= getE0(node_num);
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
 
@@ -564,7 +567,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 						else
 							tempst.factor=inv[inSt].factor*Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j];
 						// опируем старые состо€ни€, так как не знаем какое будет мен€тьс€
-						for(int oldst=0;oldst<N;oldst++)
+						for(int oldst=0;oldst<node_num;oldst++)
 							tempst.states[oldst]=inv[inSt].states[oldst];
 						/*tempst.states[0]=inv[inSt].states[0];
 						tempst.states[1]=inv[inSt].states[1];
@@ -600,7 +603,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 							tempst.states[0]=temp[k].states[0];
 							tempst.states[1]=temp[k].states[1];
 							tempst.states[2]=temp[k].states[2];*/
-							for(int oldst=0;oldst<N;oldst++)
+							for(int oldst=0;oldst<node_num;oldst++)
 								tempst.states[oldst]=temp[k].states[oldst];
 							tempst.states[curInter[interNumber][i].n2]=j;
 
@@ -610,7 +613,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 
 							curE=0;
-							for(int eInd=0;eInd<N;eInd++)
+							for(int eInd=0;eInd<node_num;eInd++)
 							{
 								curE+=Energie[tempst.states[eInd]];
 							}
@@ -639,11 +642,11 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #5 */void act_inside(vector<state> &inv,vector<state> &outv,int plaquetNumber)
+/* #5 */void act_inside(vector<state> &inv,vector<state> &outv,int plaquetNumber, int node_num)
 {
 	state tempst;
 	double curE,E0;
-	E0=N*Energie[0];
+	E0= getE0(node_num);
 	temp.clear();
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
@@ -653,12 +656,12 @@ void collect(vector<state> &outvec,vector<state> &invec)
 			{
 
 
-				for(int oldst=0;oldst<N;oldst++)
+				for(int oldst=0;oldst<node_num;oldst++)
 					tempst.states[oldst]=inv[inSt].states[oldst];
 				tempst.states[plaquetNumber]=j;
 
 				curE=0;
-				for(int eInd=0;eInd<N;eInd++)
+				for(int eInd=0;eInd<node_num;eInd++)
 					curE+=Energie[tempst.states[eInd]];
 
 				if(E0!=curE)
@@ -682,11 +685,11 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #6 */void act_inside_enrgy_power(vector<state> &inv,vector<state> &outv,int power,int plaquetNumber)
+/* #6 */void act_inside_enrgy_power(vector<state> &inv,vector<state> &outv,int power,int plaquetNumber, int node_num)
 {
 	state tempst;
 	double curE,E0;
-	E0=N*Energie[0];
+	E0= getE0(node_num);
 	temp.clear();
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
@@ -696,12 +699,12 @@ void collect(vector<state> &outvec,vector<state> &invec)
 			{
 
 
-				for(int oldst=0;oldst<N;oldst++)
+				for(int oldst=0;oldst<node_num;oldst++)
 					tempst.states[oldst]=inv[inSt].states[oldst];
 				tempst.states[plaquetNumber]=j;
 
 				curE=0;
-				for(int eInd=0;eInd<N;eInd++)
+				for(int eInd=0;eInd<node_num;eInd++)
 					curE+=Energie[tempst.states[eInd]];
 
 				if(E0!=curE)
@@ -725,11 +728,11 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #7 */void act_inside_ground(vector<state> &inv,vector<state> &outv,int plaquetNumber)
+/* #7 */void act_inside_ground(vector<state> &inv,vector<state> &outv,int plaquetNumber, int node_num)
 {
 	state tempst;
 	double curE,E0;
-	E0=N*Energie[0];
+	E0= getE0(node_num);
 	temp.clear();
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
@@ -739,12 +742,12 @@ void collect(vector<state> &outvec,vector<state> &invec)
 			{
 
 
-				for(int oldst=0;oldst<N;oldst++)
+				for(int oldst=0;oldst<node_num;oldst++)
 					tempst.states[oldst]=inv[inSt].states[oldst];
 				tempst.states[plaquetNumber]=j;
 
 				curE=0;
-				for(int eInd=0;eInd<N;eInd++)
+				for(int eInd=0;eInd<node_num;eInd++)
 					curE+=Energie[tempst.states[eInd]];
 
 				if(E0==curE)
