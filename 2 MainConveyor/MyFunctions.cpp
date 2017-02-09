@@ -12,9 +12,9 @@ using namespace std;
 
 
 //////////////////////////////////////////////////////////////////////////
-double Vmatrix[4][3][16][16];//Номер вершины в плакете, тип матрицы SP,SM или SZ,номер ряда, номер столбца
-double VmatrixInside[16][16];//Специально для внутренних воздействий
-double Energie[16]; //Энергии состояний
+double Vmatrix[4][3][DiffStates][DiffStates];//Номер вершины в плакете, тип матрицы SP,SM или SZ,номер ряда, номер столбца
+double VmatrixInside[DiffStates][DiffStates];//Специально для внутренних воздействий
+double Energie[DiffStates]; //Энергии состояний
 inter curInter [N][maxIntElem]; //массив операторов взамодействий
 int interAmount[N];// кол-во эл-тов в каждом операторе
 
@@ -253,15 +253,20 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 
 
-/* #1 */void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16], int interNumber, int node_num)
+/* #1 */void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates], int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
-	//bool flag;
-	temp2.clear();
 	double curE,E0;
-	E0=getE0(node_num);
 
+	//initialisation
+	E0=getE0(node_num);
+	temp2.clear();
+	for (int i = 0; i < node_num; i++)
+		tempst.states.push_back(DiffStates); //DiffStates- первое состояние, которое не присутствует в массивах
+	
+
+	//computation
 	for(unsigned int inSt=0;inSt<inv.size();inSt++)
 	{
 		for(int i=0;i<interAmount[interNumber];i++) //перебираем все эл-ты взаимодействия
@@ -271,7 +276,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 			for(int ort=0;ort<3;ort++)
 			{
 				temp.clear();//очищаем временный массив состояний, важно для y и z компонент
-				for(int j=0;j<16;j++)//вычисляем результат воздействия 1ой сигма-
+				for(int j=0;j<DiffStates;j++)//вычисляем результат воздействия 1ой сигма-
 				{
 					if(Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j]!=0)
 					{
@@ -305,7 +310,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 				}
 				for(int k=0;k<temp.size();k++) //действуем на полученные состояния 2ой матрицей
 				{
-					for(int j=0;j<16;j++)
+					for(int j=0;j<DiffStates;j++)
 					{
 						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
 						{
@@ -340,22 +345,20 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #2 */void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16], int interNumber, int node_num)
+/* #2 */void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates], int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
-	//bool flag;
+	double curE, E0;
+
+	//initialisation
+	E0 = getE0(node_num);
 	temp2.clear();
-	double curE,E0;
-	E0= getE0(node_num);
+	for (int i = 0; i < node_num; i++)
+		tempst.states.push_back(DiffStates); //DiffStates- первое состояние, которое не присутствует в массивах
 
-	//test
-	/*static int sti=0;
-	sti++;
-	ofstream testout;
-	if(sti==1)testout.open("testout.txt",ios::out);*/
-	//end test
 
+	//computation
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
 		for(int i=0;i<interAmount[interNumber];i++) //перебираем все эл-ты взаимодействия
@@ -365,7 +368,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 			for(int ort=0;ort<3;ort++)
 			{
 				temp.clear();//очищаем временный массив состояний, важно для y и z компонент
-				for(int j=0;j<16;j++)//вычисляем результат воздействия 1ой сигма-
+				for(int j=0;j<DiffStates;j++)//вычисляем результат воздействия 1ой сигма-
 				{
 					if(Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j]!=0)
 					{
@@ -400,7 +403,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 				}
 				for(int k=0;k<temp.size();k++) //действуем на полученные состояния 2ой матрицей
 				{
-					for(int j=0;j<16;j++)
+					for(int j=0;j<DiffStates;j++)
 					{
 						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
 						{
@@ -437,17 +440,22 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #3 */void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber, int node_num)
+/* #3 */void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
-	double curE,E0;
+	double curE, E0;
 
+	//initialisation
+	E0 = getE0(node_num);
 	temp2.clear();
-	if(inv.size()>50)
+	for (int i = 0; i < node_num; i++)
+		tempst.states.push_back(DiffStates); //DiffStates- первое состояние, которое не присутствует в массивах
+	if (inv.size()>50)
 		temp2.reserve(30000);
-	outv.clear();
-	E0= getE0(node_num);
+											 
+											 
+	//computation
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
 
@@ -459,7 +467,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 			for(int ort=0;ort<3;ort++)
 			{
 				temp.clear();//очищаем временный массив состояний, важно для y и z компонент
-				for(int j=0;j<16;j++)//вычисляем результат воздействия 1ой сигма-
+				for(int j=0;j<DiffStates;j++)//вычисляем результат воздействия 1ой сигма-
 				{
 					if(Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j]!=0)
 					{
@@ -493,7 +501,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 				}
 				for(int k=0;k<temp.size();k++) //действуем на полученные состояния 2ой матрицей
 				{
-					for(int j=0;j<16;j++)
+					for(int j=0;j<DiffStates;j++)
 					{
 						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
 						{
@@ -521,34 +529,32 @@ void collect(vector<state> &outvec,vector<state> &invec)
 				}
 			}
 		}
-
-
-		//Сортируем и собираем выходной вектор
-		//outv.clear();
-		//printState(temp2,"bef.txt");
-
 	}
+
+	//Сортируем и собираем выходной вектор
+	outv.clear();
 	if(temp2.size())
 		collect(outv,temp2);
 
 }
 
-/* #4 */void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][16][16],int interNumber, int node_num)
+/* #4 */void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
-	//bool flag;
 	double curE,E0;
 
+
+	//initialisation
+	E0 = getE0(node_num);
 	temp2.clear();
-	if(inv.size()>50)
+	for (int i = 0; i < node_num; i++)
+		tempst.states.push_back(DiffStates); //DiffStates- первое состояние, которое не присутствует в массивах
+	if (inv.size()>50)
 		temp2.reserve(30000);
-	outv.clear();
-	E0= getE0(node_num);
+
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
-
-
 		for(int i=0;i<interAmount[interNumber];i++) //перебираем все эл-ты взаимодействия
 		{
 			//temp2.clear();
@@ -556,7 +562,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 			for(int ort=0;ort<3;ort++)
 			{
 				temp.clear();//очищаем временный массив состояний, важно для y и z компонент
-				for(int j=0;j<16;j++)//вычисляем результат воздействия 1ой сигма-
+				for(int j=0;j<DiffStates;j++)//вычисляем результат воздействия 1ой сигма-
 				{
 					if(Vmatrix[curInter[interNumber][i].v1][ort][inv[inSt].states[curInter[interNumber][i].n1]][j]!=0)
 					{
@@ -593,7 +599,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 				}
 				for(int k=0;k<temp.size();k++) //действуем на полученные состояния 2ой матрицей
 				{
-					for(int j=0;j<16;j++)
+					for(int j=0;j<DiffStates;j++)
 					{
 						if(Vmatrix[curInter[interNumber][i].v2][second_ort][temp[k].states[curInter[interNumber][i].n2]][j]!=0)
 						{
@@ -630,15 +636,11 @@ void collect(vector<state> &outvec,vector<state> &invec)
 				}
 			}
 		}
-
-
-		//Сортируем и собираем выходной вектор
-		//outv.clear();
-		//printState(temp2,"bef.txt");
-
 	}
+	//Сортируем и собираем выходной вектор
+	outv.clear();
 	if(temp2.size())
-	collect(outv,temp2);
+		collect(outv,temp2);
 
 }
 
@@ -646,11 +648,17 @@ void collect(vector<state> &outvec,vector<state> &invec)
 {
 	state tempst;
 	double curE,E0;
-	E0= getE0(node_num);
+	
+	//initialisation
+	E0 = getE0(node_num);
 	temp.clear();
+	for (int i = 0; i < node_num; i++)
+		tempst.states.push_back(DiffStates); //DiffStates- первое состояние, которое не присутствует в массивах
+	
+
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
-		for(int j=0;j<16;j++)
+		for(int j=0;j<DiffStates;j++)
 		{
 			if(VmatrixInside[inv[inSt].states[plaquetNumber]][j]!=0)
 			{
@@ -689,11 +697,17 @@ void collect(vector<state> &outvec,vector<state> &invec)
 {
 	state tempst;
 	double curE,E0;
-	E0= getE0(node_num);
+
+	//initialisation
+	E0 = getE0(node_num);
 	temp.clear();
+	for (int i = 0; i < node_num; i++)
+		tempst.states.push_back(DiffStates); //DiffStates- первое состояние, которое не присутствует в массивах
+
+
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
-		for(int j=0;j<16;j++)
+		for(int j=0;j<DiffStates;j++)
 		{
 			if(VmatrixInside[inv[inSt].states[plaquetNumber]][j]!=0)
 			{
@@ -732,11 +746,16 @@ void collect(vector<state> &outvec,vector<state> &invec)
 {
 	state tempst;
 	double curE,E0;
-	E0= getE0(node_num);
+
+	//initialisation
+	E0 = getE0(node_num);
 	temp.clear();
+
+	for (int i = 0; i < node_num; i++)
+		tempst.states.push_back(DiffStates); //DiffStates- первое состояние, которое не присутствует в массивах
 	for(int inSt=0;inSt<inv.size();inSt++)
 	{
-		for(int j=0;j<16;j++)//перебираем все элементы текущей строки матрицы перехода
+		for(int j=0;j<DiffStates;j++)//перебираем все элементы текущей строки матрицы перехода
 		{
 			if(VmatrixInside[inv[inSt].states[plaquetNumber]][j]!=0)
 			{

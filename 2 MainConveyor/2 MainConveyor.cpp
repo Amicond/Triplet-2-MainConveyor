@@ -8,6 +8,8 @@
 
 //edit 08.02.2017  change vIn: read proper file for each route
 
+//edit 09.02.2017 struct states: change array to vector, all act procedures received init for "tempst"
+
 // MainConveyor.cpp : Defines the entry point for the console application.
 //
 
@@ -396,7 +398,7 @@ int main(int argc, char* argv[])
 	inproutesNums.close();
 
 	///Проверка на совпадение размеров
-	if((int)pow((double)2,N)>Namount)
+	if(3*(N)*(int)pow((double)2,N-1)>Namount)
 	{
 
 		logfile<<"Change Namount";
@@ -593,17 +595,21 @@ int main(int argc, char* argv[])
 	int vec_amount = 3 * (Order + 1)*(int)pow((double)2, Order);
 	vIn = new vector<state>[vec_amount];
 
+
 	sscanner.str("");
 	sscanner<<"spins"<<delim<<Order<<"spins_order.txt";
 	ifstream inStates((sscanner.str()).c_str(),ios::in);
 	
 	init.coeff[0]=init.coeff[1]=init.coeff[2]=0;
 	init.factor=1;
+	int cur_st;
 	for(int i=0;i<vec_amount;i++)
 	{
+		init.states.clear();
 		for(int j=0;j<Order;j++) ///TODO N->n
 		{
-			inStates >> init.states[j];
+			inStates >> cur_st;
+			init.states.push_back(cur_st);
 		}
 		vIn[i].push_back(init);
 	}
@@ -674,15 +680,19 @@ int main(int argc, char* argv[])
 
 			init.coeff[0] = init.coeff[1] = init.coeff[2] = 0;
 			init.factor = 1;
+			int cur_st;
 			for (int i = 0; i<vec_amount; i++)
 			{
 				vIn[i].clear();
+				init.states.clear();
 				for (int j = 0; j<node_num; j++) ///TODO N->n
 				{
-					inStates >> init.states[j];
+					inStates >> cur_st; 
+					init.states.push_back(cur_st);
 				}
 				vIn[i].push_back(init);
 			}
+			inStates.close();
 			//конец заполнения спинов
 
 

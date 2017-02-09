@@ -23,7 +23,9 @@ const string type1="0";
 const string type2="1";
 const string type3="2";
 
-const int maxIntElem=4; //
+
+const int DiffStates = 16; //количкество различных собственных состояний, равно размеру матриц
+const int maxIntElem=4; // количество слагаемых в операторе взаимодействия
 const int Namount=576;   //количество различных ground-состояний 6
 const int resAmount=45; //кол-во различных J факторов в 8 порядке
 const int matrixResAmount=429; //кол-во различных слагаемых в ряду теории возмущений в 8 порядке
@@ -55,11 +57,11 @@ struct state
 
 	//!!! проверить char на ок
 	char coeff[3];  //степени коэффициентов J1,J2 и (J2-J1)
-	char states[N];// номера состояний из соответствующих плакетов
+	vector<char> states;// номера состояний из соответствующих плакетов
 	bool operator<(const state &s) const//только для 2ух состояний, переделать в высших порядках
 	{
 		int i=0;
-		while(i<N)
+		while(i<states.size())
 		{
 			if(states[i]<s.states[i]) return true;
 			else if(states[i]>s.states[i]) return false;
@@ -76,10 +78,10 @@ struct state
 	}
 
 
-	bool operator==(state s) //состояния равны если номера всех состояний равны
+	bool operator==(const state &s) const //состояния равны если номера всех состояний равны
 	{
 		bool Res=true;
-		for(int i=0;i<N;i++)
+		for(int i=0;i<states.size();i++)
 			if(states[i]!=s.states[i])
 			{
 				Res=false;
@@ -88,10 +90,10 @@ struct state
 			return Res;
 	}
 
-	bool check(state s)
+	bool check(const state &s)
 	{
 		bool Res=true;
-		for(int i=0;i<N;i++)
+		for(int i=0;i<states.size();i++)
 			if(states[i]!=s.states[i])
 			{
 				Res=false;
@@ -143,7 +145,7 @@ struct res
 struct edge //для хранения координат ребер
 {
 	int x1,y1,x2,y2;
-	bool operator==(edge e2)
+	bool operator==(const edge &e2) const
 	{
 		if(((x1==e2.x1)&&(x2==e2.x2)&&(y1==e2.y1)&&(y2==e2.y2))||((x1==e2.x2)&&(x2==e2.x1)&&(y1==e2.y2)&&(y2==e2.y1)))
 		{
