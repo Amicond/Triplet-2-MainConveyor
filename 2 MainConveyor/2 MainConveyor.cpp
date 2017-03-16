@@ -14,24 +14,19 @@
 //
 
 #include "stdafx.h"
+#include "JFactors.h"
+#include "MatrixOfResults.h"
 #include "MyFunctions.h"
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <cmath>
-#include <iomanip>
-#include <time.h>
-
-using namespace std;
-ofstream logfile("log.txt",ios::out);
 
 
-vector<edge> edges;//ребра текущего маршрута
-vector<step> nodes;//вершины текущего маршрута
 
-vector<state> *ref1,*ref2;
+std::ofstream logfile("log.txt", std::ios::out);
+
+
+std::vector<edge> edges;//ребра текущего маршрута
+std::vector<step> nodes;//вершины текущего маршрута
+
+std::vector<state> *ref1,*ref2;
 int node_nums_of_edges[N][2];
 
 int minus1(int *nodeSet,int n) //вычисляем знак для текущего слагаемого в рду теории возмущения
@@ -48,7 +43,7 @@ int minus1(int *nodeSet,int n) //вычисляем знак для текущего слагаемого в рду те
 
 res **MatrixFull;//Суммарная матрица на маршрут
 
-void eval_cur_route(int r[][2],int OrderLength, int RouteLength,vector<edge> &edges,vector<step> &nodes,int &RealLength)
+void eval_cur_route(int r[][2],int OrderLength, int RouteLength, std::vector<edge> &edges, std::vector<step> &nodes,int &RealLength)
 	//заполняет для данного маршрута список ребер и их количество
 {
 	for(int i=0;i<N;i++)
@@ -100,68 +95,8 @@ void eval_cur_route(int r[][2],int OrderLength, int RouteLength,vector<edge> &ed
 }
 
 
-
-
-//////////////////////////////////////////////////////////////////////////
-res finalvalue3(vector<state> &v1,vector<state> &v2,int **Jfactors,int n) //полный перебор, можно улучшить
-{
-	res fv;
-	for(int i=0;i<(n+2)*(n+1)/2;i++)
-		fv.factors[i]=0;
-	unsigned int i1,i2;
-	int tmpres[3];
-	for(i2=0;i2<v2.size();i2++)
-	{
-		for(i1=0;i1<v1.size();i1++)
-		{
-			if(v1[i1]==v2[i2])
-			{
-				ofstream outtestFin("outfin3.txt",ios::app);
-				outtestFin<<i1<<" "<<i2<<"\n";
-				outtestFin.close();
-				for(int ttt=0;ttt<3;ttt++)
-				{
-					tmpres[ttt]=0;
-					tmpres[ttt]=v1[i1].coeff[ttt]+v2[i2].coeff[ttt];
-				}
-				/*
-				if(tmpres[0]==3)
-					fv.factors[0]+=v1[i1].factor*v2[i2].factor;
-				if(tmpres[0]==2&&tmpres[1]==1)
-					fv.factors[1]+=v1[i1].factor*v2[i2].factor;
-				if(tmpres[0]==2&&tmpres[2]==1)
-					fv.factors[2]+=v1[i1].factor*v2[i2].factor;
-				if(tmpres[0]==1&&tmpres[1]==2)
-					fv.factors[3]+=v1[i1].factor*v2[i2].factor;
-				if(tmpres[0]==1&&tmpres[1]==1&&tmpres[2]==1)
-					fv.factors[4]+=v1[i1].factor*v2[i2].factor;
-				if(tmpres[0]==1&&tmpres[2]==2)
-					fv.factors[5]+=v1[i1].factor*v2[i2].factor;
-				if(tmpres[1]==3)
-					fv.factors[6]+=v1[i1].factor*v2[i2].factor;
-				if(tmpres[1]==2&&tmpres[2]==1)
-					fv.factors[7]+=v1[i1].factor*v2[i2].factor;
-				if(tmpres[1]==1&&tmpres[2]==2)
-					fv.factors[8]+=v1[i1].factor*v2[i2].factor;
-				if(tmpres[2]==3)
-					fv.factors[9]+=v1[i1].factor*v2[i2].factor;
-				*/
-				for(int ra=0;ra<(n+2)*(n+1)/2;ra++)
-				{
-					if((tmpres[0]==Jfactors[ra][0])&&(tmpres[1]==Jfactors[ra][1])&&(tmpres[2]==Jfactors[ra][2]))
-					{
-						fv.factors[ra]+=v1[i1].factor*v2[i2].factor;
-					}
-				}
-			}
-		}
-	}
-	return fv;
-}
-
-//////////////////////////////////////////////////////////////////////////
 //03.02.2014
-int find_last_group(vector<state> &cur,int start_n)//возвращает номер последнего элемента равного заданному, работает для отсортированных массивов
+int find_last_group(std::vector<state> &cur,int start_n)//возвращает номер последнего элемента равного заданному, работает для отсортированных массивов
 ///Можно улучшить с помощью бинарного поиска
 {
 	int last=start_n;
@@ -181,7 +116,7 @@ int find_last_group(vector<state> &cur,int start_n)//возвращает номер последнего
 
 }
 
-res finalvalue4(vector<state> &v1,vector<state> &v2,int **Jfactors,int n)
+res finalvalue4(std::vector<state> &v1, std::vector<state> &v2,int **Jfactors,int n)
 {
 	res fv;
 	for(int i=0;i<(n+2)*(n+1)/2;i++)
@@ -244,9 +179,7 @@ res finalvalue4(vector<state> &v1,vector<state> &v2,int **Jfactors,int n)
 	return fv;
 }
 
-
-
-bool check_cur_operator_set(bool &Res,int OrderLength, int RealLength,int *termorder,int *op_set,vector<edge> edges)//проверяем можкт ли быть не 0 по данной конфигурации
+bool check_cur_operator_set(bool &Res,int OrderLength, int RealLength,int *termorder,int *op_set, std::vector<edge> edges)//проверяем можкт ли быть не 0 по данной конфигурации
 {
 	int start=0;
 	int end;
@@ -254,7 +187,7 @@ bool check_cur_operator_set(bool &Res,int OrderLength, int RealLength,int *termo
 	Res=true;
 	bool last=false;
 	bool if_find;
-	vector<step> nodes;
+	std::vector<step> nodes;
 	step cur_node(0,0);
 	for(int i=0;i<OrderLength;i++)
 	{
@@ -327,7 +260,7 @@ bool check_cur_operator_set(bool &Res,int OrderLength, int RealLength,int *termo
 	return Res;
 }
 
-void read_Route( int r[][2],istringstream &s)
+void read_Route( int r[][2], std::istringstream &s)
 {
 	char c=' ';
 	while(c!='n')
@@ -356,7 +289,6 @@ void read_Route( int r[][2],istringstream &s)
 	}
 
 }
-
 
 void  clear_res_Matrix(res **ans,int size)
 {
@@ -387,7 +319,7 @@ void add_res_Matrix(res **ans,res **cur,int size)
 int main(int argc, char* argv[])
 {
 	int startRouteNum,finRouteNum;
-	ifstream inproutesNums("input.txt",ios::in);
+	std::ifstream inproutesNums("input.txt", std::ios::in);
 	//запуск нескольких маршрутов
 	inproutesNums>>startRouteNum>>finRouteNum;
 
@@ -407,14 +339,14 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	stringstream fname;
-	string fstring;
-	stringstream sscanner;
+	std::stringstream fname;
+	std::string fstring;
+	std::stringstream sscanner;
 	
-	ifstream config("config.txt",ios::in);//хранит текущий порядок и кол-во маршрутов всех длин, начиная с 2
-	ifstream terms;//слагаемые ряда теории возмущений
-	ifstream operatorsset;//ненулевые наборы операторов
-	ofstream matrixRes;  //выходные файлы
+	std::ifstream config("config.txt", std::ios::in);//хранит текущий порядок и кол-во маршрутов всех длин, начиная с 2
+	std::ifstream terms;//слагаемые ряда теории возмущений
+	std::ifstream operatorsset;//ненулевые наборы операторов
+	std::ofstream matrixRes;  //выходные файлы
 
 
 
@@ -422,19 +354,19 @@ int main(int argc, char* argv[])
 	int Q; //для тестов
 	int type,Order, subOrder; //Тип маршрутов
 	int routesAmount [3][N+1];
-	vector<int*> nodeSets;
+	std::vector<int*> nodeSets;
 	int *termOrder;
 	int edge_num;//число ребер в маршруте
 	int node_num;//число вершин в маршруте
 	int r[20][2]; //2*10 - на 10 ребер с запасом
 
 	int **Jfactors; //храним возможные наборы J-факторов
-	string *strarr;
+	std::string *strarr;
 
 	//Start Test variables
 	//long start,end;
-	string out_string;
-	string str_type;
+	std::string out_string;
+	std::string str_type;
 	//End Test Var
 
 
@@ -450,7 +382,7 @@ int main(int argc, char* argv[])
 	}
 	//Если NotLoops и subOrder==Order считываем good file
 	bool goodNotLoopCase=false;
-	vector<int> goodNotLoopNums;
+	std::vector<int> goodNotLoopNums;
 	/*if((type==2)&&(subOrder==Order))
 	{
 		goodNotLoopCase=true;
@@ -479,8 +411,8 @@ int main(int argc, char* argv[])
 	{
 		logfile<<"\nWrong Const or Config file\n";
 		logfile.close();
-		cout<<"!!!!!!!!!!!!!!!!!!";
-		cin>>Q;
+		std::cout<<"!!!!!!!!!!!!!!!!!!";
+		std::cin>>Q;
 		return 3;
 	}
 
@@ -489,7 +421,7 @@ int main(int argc, char* argv[])
 
 
 	Jfactors=new int*[(Order+2)*(Order+1)/2];
-	strarr=new string[(Order+2)*(Order+1)/2];
+	strarr=new std::string[(Order+2)*(Order+1)/2];
 	for(int i=0;i<(Order+2)*(Order+1)/2;i++)
 	{
 		Jfactors[i]=new int[3];
@@ -509,10 +441,10 @@ int main(int argc, char* argv[])
 
 	sscanner.str("");
 	sscanner<<inp_fin<<delim<<Order<<"order.txt\0";
-	string s=sscanner.str();
+	std::string s=sscanner.str();
 	//test out
 	//cout<<s<<"\n";
-	terms.open(s.c_str(),ios::in);
+	terms.open(s.c_str(), std::ios::in);
 
 	//считываем все слагаемые для данного порядка
 	//отдельно для первого порядка
@@ -544,14 +476,14 @@ int main(int argc, char* argv[])
 
 //Чтение Матриц
 	//чтение матриц из файлов
-	ifstream in;
+	std::ifstream in;
 	s="";
 	for( int i=0;i<4;i++)
 	{
-		ostringstream tmp;
+		std::ostringstream tmp;
 		tmp<<(i+1);
 		s=inp_matr+"noutp_s"+tmp.str()+".txt"; //Sp
-		in.open(s.c_str(),ios::in);
+		in.open(s.c_str(), std::ios::in);
 		for(int j=0;j<16;j++)
 		{
 			for(int k=0;k<16;k++)
@@ -562,7 +494,7 @@ int main(int argc, char* argv[])
 		in.close();
 
 		s=inp_matr+"noutm_s"+tmp.str()+".txt"; //Sm
-		in.open(s.c_str(),ios::in);
+		in.open(s.c_str(), std::ios::in);
 		for(int j=0;j<16;j++)
 		{
 			for(int k=0;k<16;k++)
@@ -573,7 +505,7 @@ int main(int argc, char* argv[])
 		in.close();
 
 		s=inp_matr+"noutz_s"+tmp.str()+".txt"; //z=> второй индекс 2
-		in.open(s.c_str(),ios::in);
+		in.open(s.c_str(), std::ios::in);
 		for(int j=0;j<16;j++)
 		{
 			for(int k=0;k<16;k++)
@@ -584,7 +516,7 @@ int main(int argc, char* argv[])
 		in.close();
 	}
 
-	in.open((inp_matr+"inside_matr.txt").c_str(),ios::in);
+	in.open((inp_matr+"inside_matr.txt").c_str(), std::ios::in);
 	for(int i=0;i<16;i++)
 		for(int j=0;j<16;j++)
 		{
@@ -592,7 +524,7 @@ int main(int argc, char* argv[])
 		}
 	in.close();
 
-	in.open((inp_matr+"energy.txt").c_str(),ios::in);
+	in.open((inp_matr+"energy.txt").c_str(), std::ios::in);
 	for(int i=0;i<16;i++)
 	{
 		in>>Energie[i];
@@ -601,9 +533,9 @@ int main(int argc, char* argv[])
 
 	//Создаем массив входных состоянний
 	state init;//в будущем для четния
-	vector<state> *vIn;
+	std::vector<state> *vIn;
 	int vec_amount = 3 * (Order + 1)*(int)pow((double)2, Order);
-	vIn = new vector<state>[vec_amount];
+	vIn = new std::vector<state>[vec_amount];
 
 
 		//Инициализируем матрицы результатов
@@ -641,9 +573,9 @@ int main(int argc, char* argv[])
 			sscanner.str("");
 			sscanner<<inp_route<<Order<<"_"<<str_type<<delim<<Order<<"_"<<i<<"_"<<j<<"_routeNum_"<<str_type<<".txt";
 			s=sscanner.str();
-			operatorsset.open(s.c_str(),ios::in);
+			operatorsset.open(s.c_str(), std::ios::in);
 			getline(operatorsset,s);
-			istringstream route;
+			std::istringstream route;
 			route.str(s);
 			
 			
@@ -661,7 +593,7 @@ int main(int argc, char* argv[])
 			//заполняем спины каждый раз
 			sscanner.str("");
 			sscanner << "spins" << delim << node_num << "spins_order.txt";
-			ifstream inStates((sscanner.str()).c_str(), ios::in);
+			std::ifstream inStates((sscanner.str()).c_str(), std::ios::in);
 
 			init.coeff[0] = init.coeff[1] = init.coeff[2] = 0;
 			init.factor = 1;
@@ -703,7 +635,7 @@ int main(int argc, char* argv[])
 				if(s.length()>0)
 				{
 
-					cout<<Order<<" "<<i<<" "<<j<<" zz="<<zz<<"\n";
+					std::cout<<Order<<" "<<i<<" "<<j<<" zz="<<zz<<"\n";
 
 					zz++;
 
@@ -853,12 +785,12 @@ int main(int argc, char* argv[])
 			sscanner.str("");
 			out_string = out_res + str_type + delim;
 			sscanner<<out_string<<Order<<"_"<<i<<"_"<<j<<"_res_"<<str_type<<".txt"<<"\0";
-			matrixRes.open((sscanner.str()).c_str(),ios::out);
+			matrixRes.open((sscanner.str()).c_str(), std::ios::out);
 			
 
 			matrixRes<<real_size<<"\n{";
-			matrixRes.setf(ios::fixed);
-			matrixRes<<setprecision(10);
+			matrixRes.setf(std::ios::fixed);
+			matrixRes<< std::setprecision(10);
 
 			for(int ii=0;ii<real_size;ii++)
 			{

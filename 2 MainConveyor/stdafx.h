@@ -9,6 +9,14 @@
 
 #include <stdio.h>
 #include <tchar.h>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <algorithm>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <time.h>
 
 
 

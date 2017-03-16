@@ -1,15 +1,5 @@
 #include "stdafx.h"
-#include <algorithm>
 #include "MyFunctions.h"
-#include <sstream>
-#include <fstream>
-
-using namespace std;
-
-
-
-
-
 
 //////////////////////////////////////////////////////////////////////////
 double Vmatrix[4][3][DiffStates][DiffStates];//Номер вершины в плакете, тип матрицы SP,SM или SZ,номер ряда, номер столбца
@@ -18,10 +8,10 @@ double Energie[DiffStates]; //Энергии состояний
 inter curInter [N][maxIntElem]; //массив операторов взамодействий
 int interAmount[N];// кол-во эл-тов в каждом операторе
 
-vector<state> vIn[Namount],vOut1[Namount],vOut2[Namount]; //вектора состоянй-используем по очереди один как входной другой как выходной, на следующем шаге - наоборот
-vector<state> vOutTemp1,vOutTemp2;//Промежуточные вектора
-vector<state> vtemp;
-vector<state> temp,temp2,tempvec,tempvec2;
+std::vector<state> vIn[Namount],vOut1[Namount],vOut2[Namount]; //вектора состоянй-используем по очереди один как входной другой как выходной, на следующем шаге - наоборот
+std::vector<state> vOutTemp1,vOutTemp2;//Промежуточные вектора
+std::vector<state> vtemp;
+std::vector<state> temp,temp2,tempvec,tempvec2;
 state init;
 //////////////////////////////////////////////////////////////////////////
 
@@ -194,14 +184,14 @@ void generate_all_Jfactors(int n,int **Jfactors)
 	}
 }
 
-void generate_all_Jstrings(int n,int **Jfactors,string *strarr)
+void generate_all_Jstrings(int n,int **Jfactors, std::string *strarr)
 {
 	bool first;
-	string js[3];
+	std::string js[3];
 	js[0]="J1^";
 	js[1]="J2^";
 	js[2]="(J2-J1)^";
-	ostringstream out;
+	std::ostringstream out;
 	for(int i=0;i<(n+2)*(n+1)/2;i++)
 	{
 		first=true;
@@ -226,7 +216,7 @@ void generate_all_Jstrings(int n,int **Jfactors,string *strarr)
 	}
 }
 
-void collect(vector<state> &outvec,vector<state> &invec)
+void collect(std::vector<state> &outvec, std::vector<state> &invec)
 {
 	int index=0;
 	sort(invec.begin(),invec.end());
@@ -252,7 +242,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 
 
-/* #0 */void act_copy(vector<state> &inv, vector<state> &outv)//просто копирует состояние, нужно для более единообразной раоты в первом порядке
+/* #0 */void act_copy(std::vector<state> &inv, std::vector<state> &outv)//просто копирует состояние, нужно для более единообразной раоты в первом порядке
 {
 	for (auto a : inv)
 	{
@@ -260,7 +250,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 	}
 }
 
-/* #1 */void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates], int interNumber, int node_num)
+/* #1 */void act(std::vector<state> &inv, std::vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates], int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
@@ -352,7 +342,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #2 */void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates], int interNumber, int node_num)
+/* #2 */void act_ground(std::vector<state> &inv, std::vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates], int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
@@ -447,7 +437,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #3 */void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num)
+/* #3 */void act_energy(std::vector<state> &inv, std::vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
@@ -545,7 +535,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #4 */void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num)
+/* #4 */void act_energy_power(std::vector<state> &inv, std::vector<state> &outv,int power,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num)
 {
 	state tempst;
 	int second_ort;
@@ -651,7 +641,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #5 */void act_inside(vector<state> &inv,vector<state> &outv,int plaquetNumber, int node_num)
+/* #5 */void act_inside(std::vector<state> &inv, std::vector<state> &outv,int plaquetNumber, int node_num)
 {
 	state tempst;
 	double curE,E0;
@@ -700,7 +690,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #6 */void act_inside_enrgy_power(vector<state> &inv,vector<state> &outv,int power,int plaquetNumber, int node_num)
+/* #6 */void act_inside_enrgy_power(std::vector<state> &inv, std::vector<state> &outv,int power,int plaquetNumber, int node_num)
 {
 	state tempst;
 	double curE,E0;
@@ -749,7 +739,7 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 }
 
-/* #7 */void act_inside_ground(vector<state> &inv,vector<state> &outv,int plaquetNumber, int node_num)
+/* #7 */void act_inside_ground(std::vector<state> &inv, std::vector<state> &outv,int plaquetNumber, int node_num)
 {
 	state tempst;
 	double curE,E0;
@@ -796,8 +786,6 @@ void collect(vector<state> &outvec,vector<state> &invec)
 		collect(outv,temp);
 
 }
-
-
 
 void generate_procedure_order(int *termorder,int* operatororder,int edge_amount,int num,int *Res,int *power)
 {

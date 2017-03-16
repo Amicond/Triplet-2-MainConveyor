@@ -1,130 +1,110 @@
 #include "stdafx.h"
-#include "MyFunctions.h"
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <cmath>
-#include <iomanip>
-#include <time.h>
+#include "JFactors.h"
 
-class JFactors
+
+
+bool JFactors::JFactor::operator==(const JFactor& jf2)const
 {
-	struct JFactor
-	{
-		static const int N=3;
-		int powers[3];
-		bool operator==(const JFactor& jf2)
-		{
-			//используем явный вид для скорости
-			return (powers[0] == jf2.powers[0]) && (powers[1] == jf2.powers[1]) && (powers[2] == jf2.powers[2]);
-		}
-		JFactor(int n[N])
-		{
-			for (int i = 0; i < N; i++)
-				powers[i] = n[i];
-		}
-	};
+	//используем явный вид для скорости
+	return (powers[0] == jf2.powers[0]) && (powers[1] == jf2.powers[1]) && (powers[2] == jf2.powers[2]);
+}
 
-private:
-	static const int MaxOrder = 10;
-	static int order;
-	static vector<JFactor> jfactors;
-	static vector<string> jstrings;
+JFactors::JFactor::JFactor(int n[Npowers])
+{
+	for (int i = 0; i < Npowers; i++)
+		powers[i] = n[i];
+}
 
-	static void generate_all_Jfactors()
+void JFactors::generate_all_Jfactors()
+{
+	jfactors.clear();
+	int temp;
+	int cur_num = 0;
+	int curJfac[JFactor::Npowers];
+	for (int i = 0; i<(order + 1)*(order + 1)*(order + 1); i++)
 	{
-		int temp;
-		int cur_num = 0;
-		int curJfac[3];
-		for (int i = 0; i<(order + 1)*(order + 1)*(order + 1); i++)
+		temp = i;
+		for (int j = 0; j<JFactor::Npowers; j++)
 		{
-			temp = i;
-			for (int j = 0; j<3; j++)
+			curJfac[j] = temp % (order + 1);
+			temp /= (order + 1);
+		}
+		if (curJfac[0] + curJfac[1] + curJfac[2] == order)
+		{
+			jfactors.push_back(JFactor(curJfac));
+		}
+
+	}
+}
+
+void JFactors::generate_all_Jstrings()
+{
+	jstrings.clear();
+	bool not_first;
+	std::string js[JFactor::Npowers];
+	js[0] = "J1^";
+	js[1] = "J2^";
+	js[2] = "(J2-J1)^";
+	std::ostringstream out;
+	for (int i = 0; i<jfactors.size(); i++)
+	{
+		not_first = false;
+		out.str("");
+		for (int j = 0; j<JFactor::Npowers; j++)
+		{
+			if (jfactors[i].powers[j] != 0)
 			{
-				curJfac[j] = temp % (order + 1);
-				temp /= (order + 1);
+				if (not_first)
+					out << "*";
+				else
+					not_first = true;
+				out << js[j] << jfactors[i].powers[j];
 			}
-			if (curJfac[0] + curJfac[1] + curJfac[2] == order)
-			{
-				jfactors.push_back(JFactor(curJfac));
-			}
-
 		}
+		jstrings.push_back(out.str());
 	}
+}
 
-	static void generate_all_Jstrings()
+void JFactors::setOrder(int ord)
+{
+	if (ord > 0 && ord < MaxOrder)
 	{
-		bool not_first;
-		string js[3];
-		js[0] = "J1^";
-		js[1] = "J2^";
-		js[2] = "(J2-J1)^";
-		ostringstream out;
-		for (int i = 0; i<jfactors.size(); i++)
-		{
-			not_first = false;
-			out.str("");
-			for (int j = 0; j<3; j++)
-			{
-				if (jfactors[i].powers[j] != 0)
-				{
-					if (not_first)
-						out << "*";
-					else
-						not_first = true;
-					out << js[j] << jfactors[i].powers[j];
-				}
-			}
-			jstrings.push_back(out.str());
-		}
+		order = ord;
+		generate_all_Jfactors();
+		generate_all_Jstrings();
 	}
-public:
-	
-	
-	static void setOrder(int ord)
+}
+
+int JFactors::getNumberByPowers(int powers[JFactor::Npowers])
+{
+	auto it = find(jfactors.begin(), jfactors.end(), JFactor(powers));
+	if (it != jfactors.end())
 	{
-		if (ord > 0 && ord < MaxOrder)
-		{
-			order = ord;
-			generate_all_Jfactors();
-			generate_all_Jstrings();
-		}
+		return distance(jfactors.begin(), it);
 	}
-
-
-	static int getNumberByPowers(int powers[N])
+	else
 	{
-		auto it = find(jfactors.begin(), jfactors.end(), JFactor(powers));
-		if (it != jfactors.end())
-		{
-			return distance(jfactors.begin(), it);
-		}
-		else
-		{
-			return -1;
-		}
+		return -1;
 	}
-	static string getStringByNumber(int k)
+}
+
+std::string JFactors::getStringByNumber(int k)
+{
+	if (k > 0 && k < jstrings.size())
 	{
-		if (k > 0 && k < jstrings.size())
-		{
-			return jstrings[k];
-		}
-		else
-		{
-			return "";
-		}
+		return jstrings[k];
 	}
-
-	static string getStringByPowers(int powers[N])
+	else
 	{
-		getStringByNumber(getNumberByPowers(powers));
+		return "";
 	}
+}
 
-
-
-};
+std::string JFactors::getStringByPowers(int powers[JFactor::Npowers])
+{
+	return getStringByNumber(getNumberByPowers(powers));
+}
 
 int JFactors::order = -1;
+std::vector<JFactors::JFactor> JFactors::jfactors;
+std::vector<std::string> JFactors::jstrings;

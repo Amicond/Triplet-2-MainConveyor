@@ -1,27 +1,21 @@
+#pragma once
 #include "stdafx.h"
-#include <vector>
-#include <string>
-using namespace std;
 
-///
-
-
-///
 const int N=5;
 
 //start test const
 const int function_flag=4;
 //end test const
 
-const string delim="\\";
-const string inp_fin="final_data";
-const string inp_matr="matrixes"+delim+"b3_";
-const string inp_route="input_routes"+delim;
-const string out_res="results_";
+const std::string delim="\\";
+const std::string inp_fin="final_data";
+const std::string inp_matr="matrixes"+delim+"b3_";
+const std::string inp_route="input_routes"+delim;
+const std::string out_res="results_";
 
-const string type1="0";
-const string type2="1";
-const string type3="2";
+const std::string type1="0";
+const std::string type2="1";
+const std::string type3="2";
 
 
 const int DiffStates = 16; //количкество различных собственных состо€ний, равно размеру матриц
@@ -57,7 +51,7 @@ struct state
 
 	//!!! проверить char на ок
 	char coeff[3];  //степени коэффициентов J1,J2 и (J2-J1)
-	vector<char> states;// номера состо€ний из соответствующих плакетов
+	std::vector<char> states;// номера состо€ний из соответствующих плакетов
 	bool operator<(const state &s) const//только дл€ 2ух состо€ний, переделать в высших пор€дках
 	{
 		int i=0;
@@ -166,16 +160,16 @@ struct edge //дл€ хранени€ координат ребер
 
 
 //////////////////////////////////////////////////////////////////////////
-extern double Vmatrix[4][3][16][16];//Ќомер вершины в плакете, тип матрицы SP,SM или SZ,номер р€да, номер столбца
-extern double VmatrixInside[16][16];//—пециально дл€ внутренних воздействий
-extern double Energie[16]; //Ёнергии состо€ний
+extern double Vmatrix[4][3][DiffStates][DiffStates];//Ќомер вершины в плакете, тип матрицы SP,SM или SZ,номер р€да, номер столбца
+extern double VmatrixInside[DiffStates][DiffStates];//—пециально дл€ внутренних воздействий
+extern double Energie[DiffStates]; //Ёнергии состо€ний
 extern inter curInter [N][maxIntElem]; //массив операторов взамодействий
 extern int interAmount[N];// кол-во эл-тов в каждом операторе
 
-extern vector<state> vIn[Namount],vOut1[Namount],vOut2[Namount]; //вектора состо€нй-используем по очереди один как входной другой как выходной, на следующем шаге - наоборот
-extern vector<state> vOutTemp1,vOutTemp2;//ѕромежуточные вектора
-extern vector<state> vtemp;
-extern vector<state> temp,temp2,tempvec,tempvec2;
+extern std::vector<state> vIn[Namount],vOut1[Namount],vOut2[Namount]; //вектора состо€нй-используем по очереди один как входной другой как выходной, на следующем шаге - наоборот
+extern std::vector<state> vOutTemp1,vOutTemp2;//ѕромежуточные вектора
+extern std::vector<state> vtemp;
+extern std::vector<state> temp,temp2,tempvec,tempvec2;
 extern state init;
 //////////////////////////////////////////////////////////////////////////
 
@@ -187,26 +181,25 @@ void returnV(inter curInter[][maxIntElem],int interAmount[],int interN,int n1,in
 
 void generate_all_Jfactors(int n,int **Jfactors);
 
-void generate_all_Jstrings(int n,int **Jfactors,string *strarr);
+void generate_all_Jstrings(int n,int **Jfactors,std::string *strarr);
 
 
-void collect(vector<state> &outvec,vector<state> &invec);
+void collect(std::vector<state> &outvec,std::vector<state> &invec);
 
+void act_copy(std::vector<state> &inv, std::vector<state> &outv);//просто копирует состо€ние, нужно дл€ более единообразной раоты в первом пор€дке
 
-void act_copy(vector<state> &inv, vector<state> &outv);//просто копирует состо€ние, нужно дл€ более единообразной раоты в первом пор€дке
+void act(std::vector<state> &inv,std::vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
 
-void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
+void act_ground(std::vector<state> &inv,std::vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
 
-void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
+void act_energy(std::vector<state> &inv,std::vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
 
-void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
+void act_energy_power(std::vector<state> &inv,std::vector<state> &outv,int power,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
 
-void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
+void act_inside(std::vector<state> &inv,std::vector<state> &outv,int plaquetNumber, int node_num);
 
-void act_inside(vector<state> &inv,vector<state> &outv,int plaquetNumber, int node_num);
+void act_inside_ground(std::vector<state> &inv,std::vector<state> &outv,int plaquetNumber, int node_num);
 
-void act_inside_ground(vector<state> &inv,vector<state> &outv,int plaquetNumber, int node_num);
-
-void act_inside_enrgy_power(vector<state> &inv,vector<state> &outv,int power,int plaquetNumber, int node_num);
+void act_inside_enrgy_power(std::vector<state> &inv,std::vector<state> &outv,int power,int plaquetNumber, int node_num);
 
 void generate_procedure_order(int *termorder,int* operatororder,int edge_amount,int num,int *Res,int *power);
