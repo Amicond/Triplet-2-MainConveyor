@@ -252,6 +252,13 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 
 
+/* #0 */void act_copy(vector<state> &inv, vector<state> &outv)//просто копирует состояние, нужно для более единообразной раоты в первом порядке
+{
+	for (auto a : inv)
+	{
+		outv.push_back(a);
+	}
+}
 
 /* #1 */void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates], int interNumber, int node_num)
 {
@@ -794,6 +801,14 @@ void collect(vector<state> &outvec,vector<state> &invec)
 
 void generate_procedure_order(int *termorder,int* operatororder,int edge_amount,int num,int *Res,int *power)
 {
+	//первый порядок отдельно
+	if (num == 1)
+	{
+		power[0] = 0;
+		Res[0] = 1;
+		return;
+	}
+	//общий случай для остальных порядков
 	for(int i=0;i<num;i++)
 	{
 		power[i]=0;

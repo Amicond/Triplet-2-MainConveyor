@@ -7,7 +7,7 @@ using namespace std;
 
 
 ///
-const int N=8;
+const int N=5;
 
 //start test const
 const int function_flag=4;
@@ -121,12 +121,12 @@ struct inter
 
 struct res
 {
-	double factors[matrixResAmount]; //итоговые множители при полном сворачивании
+	double factors[resAmount]; //итоговые множители при полном сворачивании
 	//28 - число различных факторов в 6 порядке
 
 
 	//OK
-	res& operator+=(res &tmp)
+	res& operator+=(const res& tmp)
 	{
 		for(int i=0;i<matrixResAmount;i++)
 		{
@@ -192,13 +192,16 @@ void generate_all_Jstrings(int n,int **Jfactors,string *strarr);
 
 void collect(vector<state> &outvec,vector<state> &invec);
 
-void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber, int node_num);
 
-void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber, int node_num);
+void act_copy(vector<state> &inv, vector<state> &outv);//просто копирует состояние, нужно для более единообразной раоты в первом порядке
 
-void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][16][16],int interNumber, int node_num);
+void act(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
 
-void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][16][16],int interNumber, int node_num);
+void act_ground(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
+
+void act_energy(vector<state> &inv,vector<state> &outv,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
+
+void act_energy_power(vector<state> &inv,vector<state> &outv,int power,double Vmatrix[4][3][DiffStates][DiffStates],int interNumber, int node_num);
 
 void act_inside(vector<state> &inv,vector<state> &outv,int plaquetNumber, int node_num);
 

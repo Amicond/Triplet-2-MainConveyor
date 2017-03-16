@@ -36,6 +36,7 @@ int node_nums_of_edges[N][2];
 
 int minus1(int *nodeSet,int n) //вычисляем знак для текущего слагаемого в рду теории возмущения
 {
+	if (n == 1) return 1;//для первого порядка
 	int res=1;
 	for(int i=0;i<n-1;i++)
 	{
@@ -44,13 +45,13 @@ int minus1(int *nodeSet,int n) //вычисляем знак для текущего слагаемого в рду те
 	}
 	return res;
 }
-res **Matrix[matrixResAmount]; //своя матрица под каждое слагаемое ряда в 6 порядке
+
 res **MatrixFull;//Суммарная матрица на маршрут
 
 void eval_cur_route(int r[][2],int OrderLength, int RouteLength,vector<edge> &edges,vector<step> &nodes,int &RealLength)
 	//заполняет для данного маршрута список ребер и их количество
 {
-	for(int i=0;i<8;i++)
+	for(int i=0;i<N;i++)
 	{
 		node_nums_of_edges[i][0]=0;
 		node_nums_of_edges[i][1]=0;
@@ -466,7 +467,7 @@ int main(int argc, char* argv[])
 	getline(config,out_string);//Считываем заголовок - он не важен
 	getline(config,out_string);//Считываем заголовок - он не важен
 
-	for(int i=2;i<=N;i++)
+	for(int i=1;i<=N;i++)
 	{
         config>>Q>>routesAmount[0][i]>>routesAmount[1][i]>>routesAmount[2][i];
 	}
@@ -514,20 +515,29 @@ int main(int argc, char* argv[])
 	terms.open(s.c_str(),ios::in);
 
 	//считываем все слагаемые для данного порядка
-	while(!terms.eof())
+	//отдельно для первого порядка
+	if (Order == 1)
 	{
-		getline(terms,s);
-		sscanner.str(s);
-		if(s.length()>0)
+		termOrder = new int[1];
+		termOrder[0] = -1;
+		nodeSets.push_back(termOrder);
+	}
+	else//для всех остальных
+	{
+		while (!terms.eof())
 		{
-			termOrder=new int[Order-1];
-			for(int i=0;i<Order-1;i++)
+			getline(terms, s);
+			sscanner.str(s);
+			if (s.length() > 0)
 			{
-				sscanner>>termOrder[i];
+				termOrder = new int[Order - 1];
+				for (int i = 0; i < Order - 1; i++)
+				{
+					sscanner >> termOrder[i];
+				}
+				nodeSets.push_back(termOrder);
 			}
-			nodeSets.push_back(termOrder);
 		}
-
 	}
 	int *cur_operator_set;
 	bool result;
@@ -589,37 +599,14 @@ int main(int argc, char* argv[])
 	}
 	//Конец Чтения Матриц
 
-	//Задаем порядок спинов
-	state init;
+	//Создаем массив входных состоянний
+	state init;//в будущем для четния
 	vector<state> *vIn;
 	int vec_amount = 3 * (Order + 1)*(int)pow((double)2, Order);
 	vIn = new vector<state>[vec_amount];
 
 
-	sscanner.str("");
-	sscanner<<"spins"<<delim<<Order<<"spins_order.txt";
-	ifstream inStates((sscanner.str()).c_str(),ios::in);
-	
-	init.coeff[0]=init.coeff[1]=init.coeff[2]=0;
-	init.factor=1;
-	int cur_st;
-	for(int i=0;i<vec_amount;i++)
-	{
-		init.states.clear();
-		for(int j=0;j<Order;j++) ///TODO N->n
-		{
-			inStates >> cur_st;
-			init.states.push_back(cur_st);
-		}
-		vIn[i].push_back(init);
-	}
-
-	//test
-	//ofstream ccout("ttt.txt",ios::out);
-	//end test
-	//
-
-	//Инициализируем матрицы результатов
+		//Инициализируем матрицы результатов
 	MatrixFull=new res*[vec_amount];
 	for(int i=0;i<vec_amount;i++)
 		MatrixFull[i]=new res[vec_amount];
@@ -647,15 +634,10 @@ int main(int argc, char* argv[])
 				continue;//пропускаем если не подходит по заданным номерам
 			//Конец Блока управления различными копиями
 
-			//Блок управления для случая NotLoop subOrder==Order
-			if((goodNotLoopCase)&&(find(goodNotLoopNums.begin(),goodNotLoopNums.end(),j)==goodNotLoopNums.end()))
-			{
-				//continue;
-			}
+			
 
 			clear_res_Matrix(MatrixFull,vec_amount);//Очищаем матрицы результатов для нового маршрута
-
-			//ccout<<"j="<<j<<"\n";
+			
 			sscanner.str("");
 			sscanner<<inp_route<<Order<<"_"<<str_type<<delim<<Order<<"_"<<i<<"_"<<j<<"_routeNum_"<<str_type<<".txt";
 			s=sscanner.str();
@@ -664,8 +646,11 @@ int main(int argc, char* argv[])
 			istringstream route;
 			route.str(s);
 			
+			
 			read_Route(r,route);
 			eval_cur_route(r,Order,i,edges,nodes,edge_num);
+
+			
 
 			for(int ll=0;ll<edge_num;ll++)
 			{
@@ -710,21 +695,16 @@ int main(int argc, char* argv[])
 
 			getline(operatorsset,s);
 			real_size=3*node_num*(int)pow((double)2,node_num-1);
-			int zz=0;
+			int zz=0;		
 			while(!operatorsset.eof())
 			{
-
-
 				getline(operatorsset,s);
 
 				if(s.length()>0)
 				{
 
 					cout<<Order<<" "<<i<<" "<<j<<" zz="<<zz<<"\n";
-					//test
-					//ccout<<n<<" "<<i<<" "<<j<<" zz="<<zz<<" ";
-					//ccout<<s<<" ";
-					//end test
+
 					zz++;
 
 					sscanner.str(s);
@@ -738,9 +718,7 @@ int main(int argc, char* argv[])
 						//Пока вычисляем все конфинурации, нужно будет написать новый чек если будут вычисления в старших порядках
 						//check_cur_operator_set(result,Order,edge_num,nodeSets[k],cur_operator_set,edges);
 						//if(result)//вычисляем кофигурацию
-						{
-							/*if(k==nodeSets.size()-1)
-								t1=clock();*/
+						{					
 							for(int ll=0;ll<real_size;ll++)//очищаем выходные данные
 							{
 								vOut1[ll].clear();
@@ -759,6 +737,9 @@ int main(int argc, char* argv[])
 										ref2=&vOut1[ll];
 									switch(procedure_order[mm])//выбираем процедуру
 									{
+										case 1:
+											act(*ref1, *ref2, Vmatrix, cur_operator_set[mm], node_num);
+											break;
 										case 2:
 											act_ground(*ref1,*ref2,Vmatrix,cur_operator_set[mm],node_num);
 											break;
@@ -800,6 +781,12 @@ int main(int argc, char* argv[])
 							{
 								ref1=&vIn[ll];
 								ref2=&vOutTemp1;
+								//для случая первого порядка просто копируем
+								if (Order == 1)
+								{
+									act_copy(vIn[ll], vOut2[ll]);
+								}
+								//для всех остальных порядков
 								for(int mm=Order-1;mm>Order-1-Order/2;mm--)
 								{
 									if(mm==Order-Order/2)//если остался последний шаг
@@ -842,114 +829,33 @@ int main(int argc, char* argv[])
 										vOutTemp1.clear();
 									}
 								}
-								//logfile<<"curlen="<<i<<" curn="<<j<<" zz="<<zz<<" k="<<k<<" x="<<ll<<" size1="<<vOut1[ll].size()<<" size2="<<vOut2[ll].size()<<"\n";
 							}
 
-
-							//start=clock();
-							/*ofstream outtestFin;
-							if(function_flag==4)
-							{
-								outtestFin.open("outfin4.txt",ios::out);
-							}
-							else
-							{
-								outtestFin.open("outfin3.txt",ios::out);
-							}
-							outtestFin.close();*/
 							for(int x=0;x<real_size;x++)
 							{
 								for(int y=0; y<real_size;y++)
 								{
-									//Start Test code #1
 									res tmpres;
+									
+									tmpres=finalvalue4(vOut1[x],vOut2[y],Jfactors,Order);
 
-									/*if(function_flag==3)
-									{
-										ofstream outtestFin("outfin3.txt",ios::app);
-										outtestFin<<"N "<<x<<" "<<y<<"\n";
-										outtestFin.close();
-										tmpres=finalvalue3(vOut1[x],vOut2[y],Jfactors,n);
-										out_string="Test3-Results\\";
-									}
-									else if(function_flag==4)*/
-									{
-										//Start debug code #12
-										//ofstream outtestFin("outfin4.txt",ios::app);
-										//outtestFin<<"N "<<x<<" "<<y<<"\n";
-										//outtestFin.close();
-										//End debug code #12
-
-										tmpres=finalvalue4(vOut1[x],vOut2[y],Jfactors,Order);
-										//out_string="Test4-Results\\";
-										out_string=out_res+str_type+delim;
-
-									}
-									//End Test code #1
-
-
-
-
-									//Test for symmetry
-									//////////////////////////////////////////////////////////////////////////
-									//res tmpres2=finalvalue3(vOut1[y],vOut2[x],Jfactors,n);
-									//////////////////////////////////////////////////////////////////////////
-									//End Test for symmetry
-									//Matrix[k][x][y]+=tmpres;
 									if(minus1(nodeSets[k],Order)==-1)
 										tmpres.minus();
 									MatrixFull[x][y]+=tmpres;
 								}
 							}
-							//end=clock();
-							//cout<<"\n\nTest time="<<(end-start)*1.0<<"\n\n";
-							//if(k==nodeSets.size()-1)
-								//ccout<<float(clock()-t1)/CLOCKS_PER_SEC<<"\n";
 						}
 					}
-
-
-					//записываем ответ в файлы - отдельно для каждого слагаемого
-					/*for(unsigned int k=0;k<nodeSets.size();k++)
-					{
-						int minus_factor=minus1(nodeSets[k],n);
-						res_Extend(Matrix[k],real_size);
-						sscanner.str("");
-						sscanner<<n<<"ord_"<<i<<"realLen_"<<j<<"RouteNum_"<<k<<"termNum.txt";
-						matrixRes.open(sscanner.str(),ios::out);
-						matrixRes<<"{";
-						for(int ii=0;ii<vec_amount;ii++)
-						{
-							matrixRes<<"{";
-							for(int jj=0;jj<vec_amount;jj++)
-							{
-								for(int kk=0;kk<(n+2)*(n+1)/2;kk++)
-								{
-
-									if(abs(Matrix[k][ii][jj].factors[kk])>0.0000000000001)
-										matrixRes<<Matrix[k][ii][jj].factors[kk]*minus_factor<<"*"<<strarr[kk]<<"+";
-								}
-								if(jj<vec_amount-1)
-									matrixRes<<"0,";
-								else
-									matrixRes<<"0";
-							}
-							if(ii<vec_amount-1)
-								matrixRes<<"},\n";
-							else
-								matrixRes<<"}\n";
-
-						}
-						matrixRes<<"}";
-						matrixRes.close();
-					}*/
 				}
 			}
-			//записываем ответ в файл - итог для маршрута
-			//res_Extend(MatrixFull,real_size);
+			
+			
 			sscanner.str("");
-			sscanner<<out_string<<Order<<"_"<<i<<"_"<<j<<"_res_"<<str_type<<".txt";
+			out_string = out_res + str_type + delim;
+			sscanner<<out_string<<Order<<"_"<<i<<"_"<<j<<"_res_"<<str_type<<".txt"<<"\0";
 			matrixRes.open((sscanner.str()).c_str(),ios::out);
+			
+
 			matrixRes<<real_size<<"\n{";
 			matrixRes.setf(ios::fixed);
 			matrixRes<<setprecision(10);
