@@ -20,11 +20,11 @@ void JFactors::generate_all_Jfactors()
 	jfactors.clear();
 	int temp;
 	int cur_num = 0;
-	int curJfac[JFactor::Npowers];
+	int curJfac[Npowers];
 	for (int i = 0; i<(order + 1)*(order + 1)*(order + 1); i++)
 	{
 		temp = i;
-		for (int j = 0; j<JFactor::Npowers; j++)
+		for (int j = 0; j<Npowers; j++)
 		{
 			curJfac[j] = temp % (order + 1);
 			temp /= (order + 1);
@@ -41,7 +41,7 @@ void JFactors::generate_all_Jstrings()
 {
 	jstrings.clear();
 	bool not_first;
-	std::string js[JFactor::Npowers];
+	std::string js[Npowers];
 	js[0] = "J1^";
 	js[1] = "J2^";
 	js[2] = "(J2-J1)^";
@@ -50,7 +50,7 @@ void JFactors::generate_all_Jstrings()
 	{
 		not_first = false;
 		out.str("");
-		for (int j = 0; j<JFactor::Npowers; j++)
+		for (int j = 0; j<Npowers; j++)
 		{
 			if (jfactors[i].powers[j] != 0)
 			{
@@ -75,7 +75,7 @@ void JFactors::setOrder(int ord)
 	}
 }
 
-int JFactors::getNumberByPowers(int powers[JFactor::Npowers])
+int JFactors::getNumberByPowers(int powers[Npowers])
 {
 	auto it = find(jfactors.begin(), jfactors.end(), JFactor(powers));
 	if (it != jfactors.end())
@@ -90,7 +90,7 @@ int JFactors::getNumberByPowers(int powers[JFactor::Npowers])
 
 std::string JFactors::getStringByNumber(int k)
 {
-	if (k > 0 && k < jstrings.size())
+	if (k >= 0 && k < jstrings.size())
 	{
 		return jstrings[k];
 	}
@@ -100,9 +100,14 @@ std::string JFactors::getStringByNumber(int k)
 	}
 }
 
-std::string JFactors::getStringByPowers(int powers[JFactor::Npowers])
+std::string JFactors::getStringByPowers(int powers[Npowers])
 {
 	return getStringByNumber(getNumberByPowers(powers));
+}
+
+int JFactors::getAmountOfPowers()
+{
+	return Npowers;
 }
 
 int JFactors::order = -1;

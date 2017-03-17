@@ -1,28 +1,8 @@
 #pragma once
 #include "stdafx.h"
-
-const int N=5;
-
-//start test const
-const int function_flag=4;
-//end test const
-
-const std::string delim="\\";
-const std::string inp_fin="final_data";
-const std::string inp_matr="matrixes"+delim+"b3_";
-const std::string inp_route="input_routes"+delim;
-const std::string out_res="results_";
-
-const std::string type1="0";
-const std::string type2="1";
-const std::string type3="2";
+#include "Consts.h"
 
 
-const int DiffStates = 16; //количкество различных собственных состояний, равно размеру матриц
-const int maxIntElem=4; // количество слагаемых в операторе взаимодействия
-const int Namount=576;   //количество различных ground-состояний 6
-const int resAmount=45; //кол-во различных J факторов в 8 порядке
-const int matrixResAmount=429; //кол-во различных слагаемых в ряду теории возмущений в 8 порядке
 
 
 struct step
@@ -122,7 +102,7 @@ struct res
 	//OK
 	res& operator+=(const res& tmp)
 	{
-		for(int i=0;i<matrixResAmount;i++)
+		for(int i=0;i<resAmount;i++)
 		{
 			factors[i]+=tmp.factors[i];
 		}
@@ -130,7 +110,7 @@ struct res
 	}
 	void minus()
 	{
-		for(int i=0;i<matrixResAmount;i++)
+		for(int i=0;i<resAmount;i++)
 			factors[i]*=-1;
 	}
 };
@@ -177,11 +157,6 @@ double getE0(int node_num);//определяет энергию уровня, к которму определяются п
 
 
 void returnV(inter curInter[][maxIntElem],int interAmount[],int interN,int n1,int n2,int dx,int dy);//устанавливает оператор взаимодействия вдоль ребра
-
-
-void generate_all_Jfactors(int n,int **Jfactors);
-
-void generate_all_Jstrings(int n,int **Jfactors,std::string *strarr);
 
 
 void collect(std::vector<state> &outvec,std::vector<state> &invec);

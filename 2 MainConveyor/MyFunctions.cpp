@@ -158,64 +158,6 @@ void returnV(inter curInter[][maxIntElem],int interAmount[],int interN,int n1,in
 
 }
 
-
-void generate_all_Jfactors(int n,int **Jfactors)
-{
-	int temp;
-	int cur_num=0;
-	int *curJfac;
-	for(int i=0;i<(n+1)*(n+1)*(n+1);i++)
-	{
-		temp=i;
-		curJfac=new int[3];
-		for(int j=0;j<3;j++)
-		{
-			curJfac[j]=temp%(n+1);
-			temp/=(n+1);
-		}
-		if(curJfac[0]+curJfac[1]+curJfac[2]==n)
-		{
-			Jfactors[cur_num][0]=curJfac[0];
-			Jfactors[cur_num][1]=curJfac[1];
-			Jfactors[cur_num][2]=curJfac[2];
-			cur_num++;
-		}
-
-	}
-}
-
-void generate_all_Jstrings(int n,int **Jfactors, std::string *strarr)
-{
-	bool first;
-	std::string js[3];
-	js[0]="J1^";
-	js[1]="J2^";
-	js[2]="(J2-J1)^";
-	std::ostringstream out;
-	for(int i=0;i<(n+2)*(n+1)/2;i++)
-	{
-		first=true;
-		for(int j=0;j<3;j++)
-		{
-			if(Jfactors[i][j]!=0)
-			{
-				out.str("");
-				if(first)
-				{
-					first=false;
-					out<<Jfactors[i][j];
-					strarr[i]=js[j]+out.str();
-				}
-				else
-				{
-					out<<Jfactors[i][j];
-					strarr[i]+="*"+js[j]+out.str();
-				}
-			}
-		}
-	}
-}
-
 void collect(std::vector<state> &outvec, std::vector<state> &invec)
 {
 	int index=0;
@@ -793,7 +735,10 @@ void generate_procedure_order(int *termorder,int* operatororder,int edge_amount,
 	if (num == 1)
 	{
 		power[0] = 0;
-		Res[0] = 1;
+		if (edge_amount == 1)
+			Res[0] = 2;
+		else
+			Res[0] = 7;
 		return;
 	}
 	//общий случай для остальных порядков

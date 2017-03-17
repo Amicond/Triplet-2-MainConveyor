@@ -4,15 +4,17 @@
 
 class JFactors
 {
+public:
+	static const int Npowers = 3;
+private:
 	struct JFactor
 	{
-		static const int Npowers = 3;
-		int powers[Npowers];
-		bool operator==(const JFactor& jf2)const;
-		JFactor(int n[Npowers]);
-	};
 
-private:
+		//static const int Npowers = 3;
+		int powers[JFactors::Npowers];
+		bool operator==(const JFactor& jf2)const;
+		JFactor(int n[JFactors::Npowers]);
+	};
 	static const int MaxOrder = 10;
 	static int order;
 	static std::vector<JFactor> jfactors;
@@ -26,11 +28,12 @@ public:
 
 	static void setOrder(int ord);
 
-	static int getNumberByPowers(int powers[JFactor::Npowers]);
+	static int getNumberByPowers(int powers[Npowers]);
 
 	static std::string getStringByNumber(int k);
 
-	static std::string getStringByPowers(int powers[JFactor::Npowers]);
+	static std::string getStringByPowers(int powers[Npowers]);
 
+	static int getAmountOfPowers();
 };
 

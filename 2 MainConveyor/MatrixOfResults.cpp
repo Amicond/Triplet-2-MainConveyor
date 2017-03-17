@@ -5,20 +5,29 @@ MatrixOfResults::MatrixOfResults(int s)
 {
 	if (s != 0)
 	{
-		set_size(s);
+		clearAndSetSize(s);
 	}
 }
 
-void MatrixOfResults::set_size(int s)
+void MatrixOfResults::clearAndSetSize(int s)
 {
 	if (matrix.size() != 0)
 	{
 		for (int i = 0; i < matrix.size(); i++)
 			matrix[i].clear();
 	}
-	matrix.reserve(s);
+	matrix.clear();
+
 	for (int i = 0; i < s; i++)
-		matrix[i].reserve(s);
+	{
+		matrix.push_back(std::vector<res>());
+		for (int j = 0; j < s; j++)
+		{
+			matrix[i].push_back(res());
+			for (int k = 0; k < resAmount; k++)
+				matrix[i][j].factors[k] = 0;
+		}
+	}
 }
 
 bool MatrixOfResults::add(int x, int y, const res &curTerm)
@@ -35,7 +44,6 @@ bool MatrixOfResults::add(int x, int y, const res &curTerm)
 
 void MatrixOfResults::printMatrix(std::string fname, int Order)
 {
-
 	std::ofstream matrixRes(fname.c_str(), std::ios::out);
 	int size = matrix.size();
 
